@@ -1,0 +1,160 @@
+function ship(name, size, startingX, startingY, orientationX, orientationY) {
+	this.name = name;
+	this.size = size;
+	this.status = new Array();
+	this.positions = new Array();
+	for (i = 0; i < size; i++)
+	{
+		this.status.push(0);
+	}
+	this.positions.push([startingX, startingY]);
+	for (i = 1; i < size; i++)
+	{
+		this.positions.push([this.positions[i-1][0] + orientationX, this.positions[i-1][1] + orientationY]);
+	}
+	this.hits = 0;
+	this.sunk = false;
+	
+} 
+
+ship.prototype.isHit = function(x, y) 
+{
+	for(i = 0; i < this.size; i++)
+	{
+		if(x == this.positions[i][0] && y == this.positions[i][1])
+		{
+			if(this.status[i] == 0)
+			{
+				this.hits++;
+				this.status[i] = 1;
+				if (this.hits == this.size)
+					this.sunk = true;
+			}
+			return true;
+		}
+	}
+	return false;
+}
+
+ship.prototype.getName = function()
+{
+	return this.name;
+}
+
+ship.prototype.isSunk = function()
+{
+	return this.sunk;
+}
+			
+ship.prototype.getStart = function()
+{
+	return this.positions[0];
+}
+
+ship.prototype.getEnd = function()
+{
+	return this.positions[this.size - 1];
+}
+
+ship.prototype.isOverlap = function(x, y)
+{
+	for(i = 0; i < this.size; i++)
+	{
+		if(x == this.positions[i][0] && y == this.positions[i][1])
+		{
+			
+			return true;
+		}
+	}
+	return false;
+}
+
+ship.prototype.overlap = function(s)
+{
+	for (i = 0; i < this.size; i++)
+        {
+        	if (s.isOverlap(this.positions[i][0], this.positions[i][1]))
+                    return true;
+        }
+        return false;
+}	
+
+function gameboard(size)
+{
+	this.size = size;
+	this.boardStatus = new Array();
+	for(i = 0; i < size; i++)
+	{
+		this.boardStatus.push(new Array());
+		for(j = 0; j < size; j++)
+		{
+			this.boardStatus[i].push(0);
+		}
+	}
+	this.ships = new Array();
+}
+
+gameboard.prototype.getSize = function()
+{
+	return this.size;
+}
+
+gameboard.prototype.shipCount = function()
+{
+	return this.ships.length;
+}
+
+gameboard.prototype.setHit = function(x, y)
+{
+	this.boardStatus[x][y] = 1;
+}
+
+gameboard.prototype.setMiss = function(x, y)
+{
+	this.boardStatus[x][y] = -1;
+}
+
+gameboard.prototype.getBoardStatus = function()
+{
+	return this.boardStatus;
+}
+
+gameboard.prototype.addShip = function(s)
+{
+	start = s.getStart();
+	end = s.getEnd();
+        if (start[0] < 0 || start[0] >= this.size || start[1] < 0 || start[1] >= this.size || end[0] < 0 || end[0] >= this.size || end[1] < 0 || end[1] >= this.size)
+        	return false;
+        for(i = 0; i < this.ships.length; i++)
+        {
+        	if (s.overlap(this.ships[i]))
+                    return false;
+        }
+        this.ships.push(s);
+        return true;
+}
+
+gameboard.prototype.shot = function(x, y)
+{
+	shotCounter = 0
+	for(shotCounter = 0; shotCounter < this.ships.length; shotCounter++)
+        {
+		s = this.ships[shotCounter];
+        	if (s.isHit(x, y))
+                {
+			//alert("You hit " + s.getName());
+                    if (s.isSunk())
+                    {
+                        this.ships.splice(shotCounter, 1);
+                        this.boardStatus[x][y] = 1;
+                        return "You sunk " + s.getName();
+                    }
+                    this.boardStatus[x][y] = 1;
+                    return "You got a hit";
+                }
+         }
+         this.boardStatus[x][y] = -1;
+         return "Miss";
+}
+
+	

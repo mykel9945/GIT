@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<canvas id="canvas" onclick="canvasClick(this, event)" width="400" height="400"
+style="background-color:#00CED1">
+</canvas>
+
+<script type="text/javascript" src="BattleShip2.txt"></script>
+
+<script>
+testShip = new ship("TestShip", 3, 0, 0, 0, 1);
+testShip2 = new ship("TestShip2", 2, 0, 3, 1, 0);
+testGB = new gameboard(5);
+testGB.addShip(testShip);
+testGB.addShip(testShip2);
+//testGB.shot(0,0);
+//testGB.shot(4,4);
+var border;
+var squareHeight;
+drawBoard();
+
+function drawBoard()
+{
+var canvas = document.getElementById("canvas");
+var ctx = canvas.getContext("2d");
+
+size = testGB.getSize();
+boardStatus = testGB.getBoardStatus();
+
+if (canvas.height < canvas.width)
+{
+	border = canvas.height * .10;
+	squareHeight = Math.floor((canvas.height - 2*border) / size);
+}
+else
+{
+	border = canvas.width * .10;
+	squareHeight = Math.floor((canvas.width - 2*border) / size);
+}
+ctx.lineWidth = 4;
+ctx.strokeRect(border, border, squareHeight*size, squareHeight*size);
+ctx.lineWidth = 2;
+for (i = border + squareHeight; i < squareHeight * size + border; i += squareHeight)
+{
+	ctx.moveTo(i, border);
+	ctx.lineTo(i, border + (squareHeight * size));
+	ctx.stroke();
+        ctx.moveTo(border, i);
+	ctx.lineTo(border + (squareHeight * size), i);
+	ctx.stroke();
+}
+for (i = 0; i < size; i++)
+{
+	for (j = 0; j < size; j++)
+        {
+		//squares[i, j] = new Rectangle(border + squareHeight * (i), border + squareHeight * (j), squareHeight, squareHeight);
+                if (boardStatus[i][j] == 1)
+                {
+                	ctx.beginPath();
+			ctx.arc(border+squareHeight*i + squareHeight*.1 + squareHeight*.4, border+squareHeight*j + squareHeight*.1 + squareHeight*.4, squareHeight*.4, 0, 2*Math.PI);
+			ctx.fillStyle = "Red";
+			ctx.fill();
+                }
+                else if (boardStatus[i][j] == -1)
+                {
+                	ctx.beginPath();
+			ctx.arc(border+squareHeight*i + squareHeight*.1 + squareHeight*.4, border+squareHeight*j + squareHeight*.1 + squareHeight*.4, squareHeight*.4, 0, 2*Math.PI);
+			ctx.fillStyle = "White";
+			ctx.fill();
+                }
+         }
+}
+}
+function canvasClick(e, event)
+{
+    var totalOffsetX = 0;
+    var totalOffsetY = 0;
+    var canvasX = 0;
+    var canvasY = 0;
+    var currentElement = e;
+
+    do{
+        totalOffsetX += currentElement.offsetLeft - currentElement.scrollLeft;
+        totalOffsetY += currentElement.offsetTop - currentElement.scrollTop;
+    }
+    while(currentElement = currentElement.offsetParent)
+
+    canvasX = event.pageX - totalOffsetX;
+    canvasY = event.pageY - totalOffsetY;
+	//alert(squareHeight);
+            for(i = 0; i < testGB.getSize(); i++)
+            {
+                for(j = 0; j < testGB.getSize(); j++)
+                {
+                    if (canvasX >= border+squareHeight*i && canvasX < border+squareHeight*(i+1) && canvasY >= border+squareHeight*j && canvasY < border+squareHeight*(j+1))
+                    {
+                        hitStatus = testGB.shot(i, j);
+                        drawBoard();
+                        //tbMessages.Text = hitStatus + "\n\n";
+                       // tbMessages.AppendText("There are " + g.shipCount() + " ships left!\n");
+                        if (testGB.shipCount() == 0)
+                        {
+				alert("You win!");
+                            //tbMessages.AppendText("You win!! \n Click on restart to play again!");
+                        }
+                        else
+                        {
+                            //tbMessages.AppendText("Click on a square to guess!\n\n");
+                        }
+
+                    }
+                }
+            }
+
+}
+</script>
+
+</body>
+</html>
